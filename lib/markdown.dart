@@ -18,8 +18,10 @@ class Markdown {
     int headingNumber = 0;
     try {
       parser.push();
-      await parser.nextByte(sharp);
-      headingNumber++;
+      while (true) {
+        await parser.nextByte(sharp);
+        headingNumber++;
+      }
     } catch (e) {
       if (headingNumber == 0) {
         throw e;
