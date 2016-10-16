@@ -6,25 +6,54 @@ import 'dart:convert' as conv;
 
 class Markdown {
   int sharp = 0x23; //#
+  int space = 0x20; //space
   int cr = 0x0d;
   int lf = 0x0a;
   par.MiniParser parser;
+  Exception defaultError = new Exception();
 
   Markdown(par.Reader src) {
     this.parser = new par.MiniParser(src);
   }
 
-  Future<GObject> heading() async {
-    int headingNumber = 0;
+  Future<GObject> italic() async {
+    return null;
+  }
+
+  Future<int> headingSharp() async {
+    int sharpNum = 0;
     try {
-      parser.push();
       while (true) {
         await parser.nextByte(sharp);
-        headingNumber++;
+        sharpNum++;
       }
-    } catch (e) {
-      if (headingNumber == 0) {
-        throw e;
+    } catch (e) {}
+    return sharpNum;
+  }
+
+  Future<int> headingSpace() async {
+    int spaceNum = 0;
+    try {
+      while (true) {
+        await parser.nextByte(space);
+        spaceNum++;
+      }
+    } catch (e) {}
+    return spaceNum;
+  }
+
+  Future<GObject> heading() async {
+    parser.push();
+    int numOfSharp = 0;
+    try {
+      numOfSharp = await headingSharp();
+      if (numOfSharp == 0) {
+        throw defaultError;
+      }
+      int numOfSpace = await headingSpace();
+      if (numOfSpace == 0) {
+        parser.back();
+        throw defaultError;
       }
     } finally {
       parser.pop();
@@ -41,7 +70,7 @@ class Markdown {
       }
     } catch (e) {} finally {}
 
-    return new HeadObject(headingNumber, ret);
+    return new HeadObject(numOfSharp, ret);
   }
 }
 
