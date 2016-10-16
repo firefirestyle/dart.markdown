@@ -4,6 +4,12 @@ import 'package:miniparser/core.dart' as par;
 import 'dart:async';
 import 'dart:convert' as conv;
 
+part 'src/headobject.dart';
+part 'src/brobject.dart';
+part 'src/strongobject.dart';
+
+class GObject {}
+
 class Markdown {
   static int sharp = 0x23; //#
   static int space = 0x20; //space
@@ -29,7 +35,7 @@ class Markdown {
     return StrongObject.encode(parser);
   }
   Future<GObject> br() async {
-    return BrObject.encode(parser);
+    return StrongObject.encode(parser);
   }
 }
 
@@ -85,162 +91,3 @@ class TextObject extends GObject {
   List<int> cont;
   TextObject(this.cont) {}
 }
-
-class BrObject extends GObject {
-  BrObject() {}
-  String toString() {
-    return "<br>";
-  }
-
-  static Future<GObject> encode(par.MiniParser parser) async {
-    try {
-      await parser.nextBytes([Markdown.cr,Markdown.lf,Markdown.cr,Markdown.lf]);
-      return new BrObject();
-    } catch(e){
-      ;
-    }
-
-    await parser.nextBytes([Markdown.lf,Markdown.lf]);
-    return new BrObject();
-  }
-}
-
-class StrongObject extends GObject {
-  List<int> content;
-
-  StrongObject(this.content) {}
-  String toString() {
-    return "<em>${conv.UTF8.decode(content,allowMalformed: true)}</em>";
-  }
-
-  static Future<GObject> encode(par.MiniParser parser) async {
-    List<int> cont = [];
-    try {
-      parser.push();
-      if (false == await emStart(parser)) {
-        throw Markdown.defaultError;
-      }
-
-      while (true) {
-        if (true == await emEnd(parser)) {
-          break;
-        }
-        //
-        var v = await parser.readByte();
-        cont.add(v);
-      }
-    } catch (e) {
-      parser.back();
-      throw e;
-    } finally {
-      parser.pop();
-    }
-    return new StrongObject(cont);
-  }
-
-  static Future<bool> emStart(par.MiniParser parser) async {
-    bool ret = false;
-    try {
-      parser.push();
-      await parser.nextBytes([Markdown.asterisk, Markdown.asterisk]);
-      if (Markdown.space == await parser.readByte()) {
-        throw Markdown.defaultError;
-      }
-      ret = true;
-    } catch (e) {
-      parser.back();
-      ret = false;
-    } finally {
-      parser.pop();
-    }
-    return ret;
-  }
-
-  static Future<bool> emEnd(par.MiniParser parser) async {
-    bool ret = false;
-    try {
-      parser.push();
-      await parser.nextBytes([Markdown.asterisk, Markdown.asterisk]);
-      ret = true;
-    } catch (e) {
-      parser.back();
-      ret = false;
-    } finally {
-      parser.pop();
-    }
-    return ret;
-  }
-}
-
-class HeadObject extends GObject {
-  int id;
-  List<int> content;
-
-  HeadObject(this.id, this.content) {}
-  String toString() {
-    return "<h${this.id}>${conv.UTF8.decode(content,allowMalformed: true)}</h${this.id}>";
-  }
-
-  static Future<GObject> encode(par.MiniParser parser) async {
-    parser.push();
-    int numOfSharp = 0;
-    try {
-      numOfSharp = await headingSharp(parser);
-      if (numOfSharp == 0) {
-        throw Markdown.defaultError;
-      }
-      int numOfSpace = await headingSpace(parser);
-      if (numOfSpace == 0) {
-        parser.back();
-        throw Markdown.defaultError;
-      }
-    } finally {
-      parser.pop();
-    }
-    //
-    List<int> ret = [];
-    try {
-      while (true) {
-        var v = await parser.readByte();
-        ret.add(v);
-        if (v == Markdown.lf) {
-          break;
-        }
-      }
-    } catch (e) {} finally {}
-
-    return new HeadObject(numOfSharp, ret);
-  }
-
-  //
-  //
-  //
-  static Future<int> headingSharp(par.MiniParser parser) async {
-    int sharpNum = 0;
-    try {
-      while (true) {
-        await parser.nextByte(Markdown.sharp);
-        sharpNum++;
-      }
-    } catch (e) {}
-    return sharpNum;
-  }
-
-  static Future<int> headingSpace(par.MiniParser parser) async {
-    int spaceNum = 0;
-    try {
-      while (true) {
-        await parser.nextByte(Markdown.space);
-        spaceNum++;
-      }
-    } catch (e) {}
-    return spaceNum;
-  }
-}
-
-class GObject {}
-
-
-///
-///
-///
