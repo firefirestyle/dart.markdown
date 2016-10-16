@@ -57,11 +57,13 @@ class ListObject extends GObject {
     return "<h${this.id}>${conv.UTF8.decode(content,allowMalformed: true)}</h${this.id}>";
   }
 
-  static Future<GObject> encode(par.MiniParser parser) async {
+  static Future<GObject> encode(par.MiniParser parser,GObject parent) async {
   }
 
-  static Future<bool> isLineHead(par.MiniParser parser) async {
-    if(parser.index == 0) {
+  static Future<bool> isLineHead(par.MiniParser parser,GObject parent) async {
+    if(parent.objList.length == 0) {
+      return true;
+    } else if(parent.objList.last is BrObject){
       return true;
     }
     return false;
