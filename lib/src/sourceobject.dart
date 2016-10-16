@@ -2,31 +2,31 @@
 part of firemarkdown;
 
 class SourceObject extends GObject {
-  List<GObject> content = [];
+
   SourceObject() {}
   String toString() {
     StringBuffer buffer = new StringBuffer();
-    for (var gobj in content) {
+    for (var gobj in objList) {
       buffer.write(gobj.toString());
     }
     return buffer.toString();
   }
 
-  static Future<GObject> encode(par.MiniParser parser) async {
+  static Future<GObject> encode(par.MiniParser parser, GObject parent) async {
     SourceObject ret = new SourceObject();
     while (true) {
       try {
-        ret.content.add(await StrongObject.encode(parser));
+        ret.objList.add(await StrongObject.encode(parser,ret));
         continue;
       } catch (e) {}
 
       try {
-        ret.content.add(await HeadObject.encode(parser));
+        ret.objList.add(await HeadObject.encode(parser,ret));
         continue;
       } catch (e) {}
 
       try {
-        ret.content.add(await BrObject.encode(parser));
+        ret.objList.add(await BrObject.encode(parser,ret));
         continue;
       } catch (e) {}
 
@@ -36,10 +36,10 @@ class SourceObject extends GObject {
       } catch (e) {
         break;// EOF
       }
-      if (ret.content.last is TextObject) {
-        (ret.content.last as TextObject).cont.add(v);
+      if (ret.objList.last is TextObject) {
+        (ret.objList.last as TextObject).cont.add(v);
       } else {
-        ret.content.add(new TextObject([v]));
+        ret.objList.add(new TextObject([v]));
       }
       break;
     }

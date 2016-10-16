@@ -8,7 +8,7 @@ class StrongObject extends GObject {
     return "<em>${conv.UTF8.decode(content,allowMalformed: true)}</em>";
   }
 
-  static Future<GObject> encode(par.MiniParser parser) async {
+  static Future<GObject> encode(par.MiniParser parser, GObject parent) async {
     List<int> cont = [];
     try {
       parser.push();

@@ -9,7 +9,9 @@ part 'src/brobject.dart';
 part 'src/strongobject.dart';
 part 'src/sourceobject.dart';
 
-class GObject {}
+class GObject {
+    List<GObject> objList = [];
+}
 
 class TextObject extends GObject {
   List<int> cont;
@@ -23,6 +25,7 @@ class Markdown {
   static int cr = 0x0d;
   static int lf = 0x0a;
   par.MiniParser parser;
+  GObject rootObj = new GObject();
   static Exception defaultError = new Exception();
 
   Markdown(par.Reader src) {
@@ -30,20 +33,21 @@ class Markdown {
   }
 
   Future<GObject> encodeAll() async {
-    return SourceObject.encode(parser);
+    return SourceObject.encode(parser,rootObj);
   }
 
   Future<GObject> heading() async {
-    return HeadObject.encode(parser);
+    return HeadObject.encode(parser,rootObj);
   }
 
   Future<GObject> strong() async {
-    return StrongObject.encode(parser);
+    return StrongObject.encode(parser,rootObj);
   }
   Future<GObject> br() async {
-    return StrongObject.encode(parser);
+    return StrongObject.encode(parser,rootObj);
   }
 }
+
 
 class ListObject extends GObject {
   int id;
@@ -54,7 +58,13 @@ class ListObject extends GObject {
   }
 
   static Future<GObject> encode(par.MiniParser parser) async {
-//    parser.next
+  }
+
+  static Future<bool> isLineHead(par.MiniParser parser) async {
+    if(parser.index == 0) {
+      return true;
+    }
+    return false;
   }
 
 }

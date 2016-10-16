@@ -6,7 +6,7 @@ class BrObject extends GObject {
     return "<br>";
   }
 
-  static Future<GObject> encode(par.MiniParser parser) async {
+  static Future<GObject> encode(par.MiniParser parser, GObject parent) async {
     try {
       await parser.nextBytes([Markdown.cr,Markdown.lf,Markdown.cr,Markdown.lf]);
       return new BrObject();

@@ -9,7 +9,7 @@ class HeadObject extends GObject {
     return "<h${this.id}>${conv.UTF8.decode(content,allowMalformed: true)}</h${this.id}>";
   }
 
-  static Future<GObject> encode(par.MiniParser parser) async {
+  static Future<GObject> encode(par.MiniParser parser, GObject parent) async {
     parser.push();
     int numOfSharp = 0;
     try {
