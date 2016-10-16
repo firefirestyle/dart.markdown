@@ -28,6 +28,9 @@ class Markdown {
   Future<GObject> strong() async {
     return StrongObject.encode(parser);
   }
+  Future<GObject> br() async {
+    return BrObject.encode(parser);
+  }
 }
 
 
