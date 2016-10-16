@@ -34,7 +34,11 @@ class SourceObject extends GObject {
   List<GObject> content = [];
   SourceObject() {}
   String toString() {
-    return "";
+    StringBuffer buffer = new StringBuffer();
+    for (var gobj in content) {
+      buffer.write(gobj.toString());
+    }
+    return buffer.toString();
   }
 
   static Future<GObject> source(par.MiniParser parser) async {
@@ -50,8 +54,18 @@ class SourceObject extends GObject {
         continue;
       } catch (e) {}
 
-      int v = await parser.readByte();
-      ret.content.add(new TextObject([v]));
+      int v = 0;
+      try {
+        v = await parser.readByte();
+      } catch (e) {
+        // EOF
+        break;
+      }
+      if (ret.content.last is TextObject) {
+        (ret.content.last as TextObject).cont.add(v);
+      } else {
+        ret.content.add(new TextObject([v]));
+      }
       break;
     }
     return ret;
