@@ -18,17 +18,19 @@ class Markdown {
   }
 
   Future<GObject> encodeAll() async {
-    return SourceObject.source(parser);
+    return SourceObject.encode(parser);
   }
 
   Future<GObject> heading() async {
-    return HeadObject.heading(parser);
+    return HeadObject.encode(parser);
   }
 
   Future<GObject> strong() async {
-    return StrongObject.em(parser);
+    return StrongObject.encode(parser);
   }
 }
+
+
 
 class SourceObject extends GObject {
   List<GObject> content = [];
@@ -41,16 +43,21 @@ class SourceObject extends GObject {
     return buffer.toString();
   }
 
-  static Future<GObject> source(par.MiniParser parser) async {
+  static Future<GObject> encode(par.MiniParser parser) async {
     SourceObject ret = new SourceObject();
     while (true) {
       try {
-        ret.content.add(await StrongObject.em(parser));
+        ret.content.add(await StrongObject.encode(parser));
         continue;
       } catch (e) {}
 
       try {
-        ret.content.add(await HeadObject.heading(parser));
+        ret.content.add(await HeadObject.encode(parser));
+        continue;
+      } catch (e) {}
+
+      try {
+        ret.content.add(await BrObject.encode(parser));
         continue;
       } catch (e) {}
 
@@ -58,8 +65,7 @@ class SourceObject extends GObject {
       try {
         v = await parser.readByte();
       } catch (e) {
-        // EOF
-        break;
+        break;// EOF
       }
       if (ret.content.last is TextObject) {
         (ret.content.last as TextObject).cont.add(v);
@@ -77,6 +83,25 @@ class TextObject extends GObject {
   TextObject(this.cont) {}
 }
 
+class BrObject extends GObject {
+  BrObject() {}
+  String toString() {
+    return "<br>";
+  }
+
+  static Future<GObject> encode(par.MiniParser parser) async {
+    try {
+      await parser.nextBytes([Markdown.cr,Markdown.lf,Markdown.cr,Markdown.lf]);
+      return new BrObject();
+    } catch(e){
+      ;
+    }
+
+    await parser.nextBytes([Markdown.lf,Markdown.lf]);
+    return new BrObject();
+  }
+}
+
 class StrongObject extends GObject {
   List<int> content;
 
@@ -85,7 +110,7 @@ class StrongObject extends GObject {
     return "<em>${conv.UTF8.decode(content,allowMalformed: true)}</em>";
   }
 
-  static Future<GObject> em(par.MiniParser parser) async {
+  static Future<GObject> encode(par.MiniParser parser) async {
     List<int> cont = [];
     try {
       parser.push();
@@ -153,7 +178,7 @@ class HeadObject extends GObject {
     return "<h${this.id}>${conv.UTF8.decode(content,allowMalformed: true)}</h${this.id}>";
   }
 
-  static Future<GObject> heading(par.MiniParser parser) async {
+  static Future<GObject> encode(par.MiniParser parser) async {
     parser.push();
     int numOfSharp = 0;
     try {
@@ -211,3 +236,8 @@ class HeadObject extends GObject {
 }
 
 class GObject {}
+
+
+///
+///
+///
