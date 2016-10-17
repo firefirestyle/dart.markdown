@@ -10,6 +10,16 @@ part 'src/lfobject.dart';
 part 'src/strongobject.dart';
 part 'src/sourceobject.dart';
 
+enum GObjectType {
+  empty,
+  text,
+  br,
+  lf,
+  string,
+  source,
+  list,
+}
+
 class GObject {
   List<GObject> objList = [];
   Future<bool> isLineHead() async {

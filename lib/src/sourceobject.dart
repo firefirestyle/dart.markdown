@@ -10,7 +10,8 @@ class SourceObject extends GObject {
     return buffer.toString();
   }
 
-  static Future<GObject> encode(par.MiniParser parser, GObject parent, {isEndAtLF: false}) async {
+  static Future<GObject> encode(par.MiniParser parser, GObject parent, {List<GObjectType> endOfTypes: null}) async {
+    endOfTypes = (endOfTypes== null?[]:endOfTypes);
     SourceObject ret = new SourceObject();
     while (true) {
       try {
@@ -26,7 +27,7 @@ class SourceObject extends GObject {
       try {
         parser.push();
         var v = await BrObject.encode(parser, ret);
-        if (isEndAtLF) {
+        if (endOfTypes.contains(GObjectType.br)) {
           parser.back();
           break;
         } else {
@@ -40,7 +41,7 @@ class SourceObject extends GObject {
       try {
         parser.push();
         var v = await LfObject.encode(parser, ret);
-        if (isEndAtLF) {
+        if (endOfTypes.contains(GObjectType.lf)) {
           parser.back();
           break;
         } else {

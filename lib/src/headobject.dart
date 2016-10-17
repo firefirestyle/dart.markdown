@@ -31,7 +31,7 @@ class HeadObject extends GObject {
       parser.pop();
     }
     GObject ret = new HeadObject(numOfSharp);
-    ret.objList.add(await SourceObject.encode(parser, ret, isEndAtLF: true));
+    ret.objList.add(await SourceObject.encode(parser, ret, endOfTypes: [GObjectType.br,GObjectType.lf]));
     return ret;
   }
 
