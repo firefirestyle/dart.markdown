@@ -11,8 +11,9 @@ class SourceObject extends GObject {
   }
 
   static Future<GObject> encode(par.MiniParser parser, GObject parent, {List<GObjectType> endOfTypes: null}) async {
-    endOfTypes = (endOfTypes== null?[]:endOfTypes);
+    endOfTypes = (endOfTypes == null ? [] : endOfTypes);
     SourceObject ret = new SourceObject();
+
     while (true) {
       try {
         ret.objList.add(await StrongObject.encode(parser, ret));
@@ -23,7 +24,10 @@ class SourceObject extends GObject {
         ret.objList.add(await HeadObject.encode(parser, ret));
         continue;
       } catch (e) {}
-
+      try {
+        ret.objList.add(await ListObject.encode(parser, ret));
+        continue;
+      } catch (e) {}
       try {
         parser.push();
         var v = await BrObject.encode(parser, ret);

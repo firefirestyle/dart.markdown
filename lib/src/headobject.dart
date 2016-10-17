@@ -15,6 +15,9 @@ class HeadObject extends GObject {
   }
 
   static Future<GObject> encode(par.MiniParser parser, GObject parent) async {
+    if(false == await parent.isLineHead()){
+      throw Markdown.defaultError;
+    }
     parser.push();
     int numOfSharp = 0;
     try {
@@ -22,7 +25,7 @@ class HeadObject extends GObject {
       if (numOfSharp == 0) {
         throw Markdown.defaultError;
       }
-      int numOfSpace = await headingSpace(parser);
+      int numOfSpace = await Markdown.nextSpaces(parser);
       if (numOfSpace == 0) {
         parser.back();
         throw Markdown.defaultError;
@@ -49,14 +52,5 @@ class HeadObject extends GObject {
     return sharpNum;
   }
 
-  static Future<int> headingSpace(par.MiniParser parser) async {
-    int spaceNum = 0;
-    try {
-      while (true) {
-        await parser.nextByte(Markdown.space);
-        spaceNum++;
-      }
-    } catch (e) {}
-    return spaceNum;
-  }
+
 }

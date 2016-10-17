@@ -9,16 +9,9 @@ part 'src/brobject.dart';
 part 'src/lfobject.dart';
 part 'src/strongobject.dart';
 part 'src/sourceobject.dart';
+part 'src/listobject.dart';
 
-enum GObjectType {
-  empty,
-  text,
-  br,
-  lf,
-  string,
-  source,
-  list,
-}
+enum GObjectType { empty, text, br, lf, string, source, list, }
 
 class GObject {
   List<GObject> objList = [];
@@ -39,7 +32,7 @@ class TextObject extends GObject {
   List<int> cont;
   TextObject(this.cont) {}
   String toString() {
-    return conv.UTF8.decode(cont,allowMalformed: true);
+    return conv.UTF8.decode(cont, allowMalformed: true);
   }
 }
 
@@ -58,6 +51,17 @@ class Markdown {
     this.parser = new par.MiniParser(src);
   }
 
+  static Future<int> nextSpaces(par.MiniParser parser) async {
+    int spaceNum = 0;
+    try {
+      while (true) {
+        await parser.nextByte(Markdown.space);
+        spaceNum++;
+      }
+    } catch (e) {}
+    return spaceNum;
+  }
+
   Future<GObject> encodeAll() async {
     return SourceObject.encode(parser, rootObj);
   }
@@ -72,23 +76,5 @@ class Markdown {
 
   Future<GObject> br() async {
     return StrongObject.encode(parser, rootObj);
-  }
-}
-
-class ListObject extends GObject {
-  int id;
-  List<int> content;
-  ListObject() {}
-  String toString() {
-    return "<h${this.id}>${conv.UTF8.decode(content,allowMalformed: true)}</h${this.id}>";
-  }
-
-  static Future<GObject> encode(par.MiniParser parser, GObject parent) async {
-    if (await parent.isLineHead()) {
-      parser.nextByte(Markdown.minus);
-      return new ListObject();
-    } else {
-      throw Markdown.defaultError;
-    }
   }
 }

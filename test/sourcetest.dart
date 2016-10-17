@@ -5,10 +5,10 @@ import 'dart:convert' as conv;
 
 void main() {
   unit.test("ps1", () async {
-    var src = new par.BytesReader.fromList(conv.UTF8.encode("## asdfasdfasdfasd"),isImmutable: true);
+    var src = new par.BytesReader.fromList(conv.UTF8.encode("## asdfasdfasdfasd\r\n# asdfasdf\r\n - asfdasfd"),isImmutable: true);
     mar.Markdown markdownObj = new mar.Markdown(src);
     var gobj = await markdownObj.encodeAll();
-    print(">>> ${gobj}");
+    print(">end> ${gobj}");
 //    unit.expect(encode, "hello");
   });
 }
