@@ -2,11 +2,16 @@ part of firemarkdown;
 
 class HeadObject extends GObject {
   int id;
-  List<int> content;
 
-  HeadObject(this.id, this.content) {}
+  HeadObject(this.id) {}
   String toString() {
-    return "<h${this.id}>${conv.UTF8.decode(content,allowMalformed: true)}</h${this.id}>";
+    StringBuffer buffer = new StringBuffer();
+    buffer.write("<h${this.id}>");
+    for (var v in this.objList) {
+      buffer.write(v);
+    }
+    buffer.write("</h${this.id}>");
+    return buffer.toString();
   }
 
   static Future<GObject> encode(par.MiniParser parser, GObject parent) async {
@@ -25,19 +30,9 @@ class HeadObject extends GObject {
     } finally {
       parser.pop();
     }
-    //
-    List<int> ret = [];
-    try {
-      while (true) {
-        var v = await parser.readByte();
-        ret.add(v);
-        if (v == Markdown.lf) {
-          break;
-        }
-      }
-    } catch (e) {} finally {}
-
-    return new HeadObject(numOfSharp, ret);
+    GObject ret = new HeadObject(numOfSharp);
+    ret.objList.add(await SourceObject.encode(parser, ret, isEndAtLF: true));
+    return ret;
   }
 
   //

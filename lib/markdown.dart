@@ -6,16 +6,31 @@ import 'dart:convert' as conv;
 
 part 'src/headobject.dart';
 part 'src/brobject.dart';
+part 'src/lfobject.dart';
 part 'src/strongobject.dart';
 part 'src/sourceobject.dart';
 
 class GObject {
-    List<GObject> objList = [];
+  List<GObject> objList = [];
+  Future<bool> isLineHead() async {
+    if (this.objList.length == 0) {
+      return true;
+    } else if (this.objList.last is BrObject) {
+      return true;
+    } else if (this.objList.last is LfObject) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }
 
 class TextObject extends GObject {
   List<int> cont;
   TextObject(this.cont) {}
+  String toString() {
+    return conv.UTF8.decode(cont,allowMalformed: true);
+  }
 }
 
 class Markdown {
@@ -24,6 +39,7 @@ class Markdown {
   static int asterisk = 0x2a;
   static int cr = 0x0d;
   static int lf = 0x0a;
+  static int minus = 0x2d;
   par.MiniParser parser;
   GObject rootObj = new GObject();
   static Exception defaultError = new Exception();
@@ -33,40 +49,36 @@ class Markdown {
   }
 
   Future<GObject> encodeAll() async {
-    return SourceObject.encode(parser,rootObj);
+    return SourceObject.encode(parser, rootObj);
   }
 
   Future<GObject> heading() async {
-    return HeadObject.encode(parser,rootObj);
+    return HeadObject.encode(parser, rootObj);
   }
 
   Future<GObject> strong() async {
-    return StrongObject.encode(parser,rootObj);
+    return StrongObject.encode(parser, rootObj);
   }
+
   Future<GObject> br() async {
-    return StrongObject.encode(parser,rootObj);
+    return StrongObject.encode(parser, rootObj);
   }
 }
-
 
 class ListObject extends GObject {
   int id;
   List<int> content;
-  ListObject(this.id, this.content) {}
+  ListObject() {}
   String toString() {
     return "<h${this.id}>${conv.UTF8.decode(content,allowMalformed: true)}</h${this.id}>";
   }
 
-  static Future<GObject> encode(par.MiniParser parser,GObject parent) async {
-  }
-
-  static Future<bool> isLineHead(par.MiniParser parser,GObject parent) async {
-    if(parent.objList.length == 0) {
-      return true;
-    } else if(parent.objList.last is BrObject){
-      return true;
+  static Future<GObject> encode(par.MiniParser parser, GObject parent) async {
+    if (await parent.isLineHead()) {
+      parser.nextByte(Markdown.minus);
+      return new ListObject();
+    } else {
+      throw Markdown.defaultError;
     }
-    return false;
   }
-
 }
