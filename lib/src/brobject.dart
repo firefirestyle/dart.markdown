@@ -1,4 +1,4 @@
-part of firemarkdown;
+part of firefirestyle.markdown;
 
 class BrObject extends GObject {
   BrObject() {}

@@ -1,4 +1,4 @@
-part of firemarkdown;
+part of firefirestyle.markdown;
 
 class StrongObject extends GObject {
   List<int> content;

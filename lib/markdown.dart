@@ -1,4 +1,4 @@
-library firemarkdown;
+library firefirestyle.markdown;
 
 import 'package:miniparser/core.dart' as par;
 import 'dart:async';
