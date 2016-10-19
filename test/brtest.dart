@@ -1,6 +1,6 @@
 import 'package:test/test.dart' as unit;
 import 'package:firefirestyle.markdown/markdown.dart' as mar;
-import 'package:miniparser/core.dart' as par;
+import 'package:firefirestyle.miniparser/core.dart' as par;
 import 'dart:convert' as conv;
 
 void main() {

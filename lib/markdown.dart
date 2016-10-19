@@ -1,6 +1,6 @@
 library firefirestyle.markdown;
 
-import 'package:miniparser/core.dart' as par;
+import 'package:firefirestyle.miniparser/core.dart' as par;
 import 'dart:async';
 import 'dart:convert' as conv;
 
